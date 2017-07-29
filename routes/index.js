@@ -181,8 +181,10 @@ router.post('/:id/edit/', function (req, res, next) {
 });
 
 router.get('/:id/delete',function (req,res,next) {
-    Student.remove({"_id":req.params.id});
-    res.redirect('/');
+    Student.remove({"_id":req.params.id},function () {
+        res.redirect('/');
+    });
+
 });
 
 module.exports = router;
