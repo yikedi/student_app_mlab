@@ -119,11 +119,12 @@ block script
                     infoWindow.setContent('Location found.');
                     map.setCenter(pos);
 
-                    var u;
+                    var i;
                     var ulist=$('#user_list');
-                    for (u in ulist){
-                        photo=u.photo;
-                        online=u.online;
+                    for (i in ulist){
+                        var u=ulist[i];
+                        var photo=u.photo;
+                        var online=u.online;
                         console.log(u.username);
                     }
 

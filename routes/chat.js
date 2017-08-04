@@ -9,8 +9,15 @@ router.get('/', function(req, res, next) {
         res.redirect('../users/login');
     }
     else {
-        var user_list=Student.find({});
-        res.render('chat', {user: req.user, user_list:user_list});
+        Student.find({},function (err,ulist) {
+            for (i=0;i<ulist.length;i++){
+                u=ulist[i];
+                console.log(u.photo);
+            }
+            res.render('chat', {user: req.user, user_list:ulist});
+        });
+
+
     }
 });
 

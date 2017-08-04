@@ -33,7 +33,7 @@ router.get('/login', function(req, res) {
 router.post('/login', passport.authenticate('local'), function(req, res) {
 
     if (req.body.photo){
-        Student.update({"username":req.body.username},{"photo":req.body.photo});
+        Student.update({"username":req.body.username},{"photo":req.body.photo,"online":true});
     }
     res.redirect('/chat');
 });
