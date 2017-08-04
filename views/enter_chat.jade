@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    form(action='/enter_chat', method='POST')
+        label User name
+        br
+        input(name='username', type='text')
+        br
+        input(type='submit', value='Add')

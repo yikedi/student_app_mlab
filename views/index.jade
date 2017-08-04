@@ -19,7 +19,13 @@ block content
         td=student.lastName
         td=student.age
         td
-          a(href='/' + student._id + '/edit')='edit'
+          a(href='/student/' + student._id + '/edit')='edit'
         td
-          a(href='/'+student._id+'/delete')='delete'
-  a(href='/new') New
+          a(href='/student/'+student._id+'/delete')='delete'
+  a(href='/student/new') New
+  br
+  a(href='/chat') enter chat room
+  br
+  a(href='/users/register') register
+  br
+  a(href='/users/login') log in

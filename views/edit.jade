@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    form(action='/'+student._id+'/edit/', method='POST')
+    form(action='/student/'+student._id+'/edit/', method='POST')
         label First Name
         br
         input(name='firstName', type='text', placeholder=student.firstName)
@@ -12,6 +12,10 @@ block content
         br
         label Age
         br
-        input(name='age',type='text', placeholder=student.age)
+        input(name='age', type='text', placeholder=student.age)
+        br
+        input(type="hidden", role="uploadcare-uploader", name="photo", data-images-only="true")
         br
         input(type='submit', value='update')
+
+
