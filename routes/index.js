@@ -59,7 +59,8 @@ router.get('/:id', function (req, res, next) {
 
 router.post('/new', function (req, res, next) {
 
-    var newStudent = new Student(req.body)
+    var newStudent = new Student(req.body);
+    newStudent.online=false;
     newStudent.save(function (err, doc) {
         res.redirect('/student')
     })

@@ -14,7 +14,7 @@ router.get('/register', function(req, res) {
 
 router.post('/register', function(req, res) {
 
-    Student.register(new Student({ username : req.body.username, photo: req.body.photo }), req.body.password, function(err, student) {
+    Student.register(new Student({ username : req.body.username, photo: req.body.photo, online:false }), req.body.password, function(err, student) {
 
         if (err) {
             return res.render('register', { student : student });
@@ -33,9 +33,17 @@ router.get('/login', function(req, res) {
 router.post('/login', passport.authenticate('local'), function(req, res) {
 
     if (req.body.photo){
-        Student.update({"username":req.body.username},{"photo":req.body.photo,"online":true});
+        Student.update({"username":req.body.username},{"photo":req.body.photo,"online":true},function () {
+            console.log(req.body.photo);
+            res.redirect('/chat');
+        });
     }
-    res.redirect('/chat');
+    else {
+        Student.update({"username":req.body.username},{"online":true},function () {
+            res.redirect('/chat');
+        })
+    }
+
 });
 
 router.get('/logout', function(req, res) {
