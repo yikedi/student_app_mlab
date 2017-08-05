@@ -19,7 +19,9 @@ block style
             position: fixed;
             bottom: 0;
             width: 100%;
-            float:right
+            float:right;
+            alignment:right;
+            clear:top;
         }
 
         form input {
@@ -120,8 +122,6 @@ block script
 
             var msg=username+": "+txt;
             $('#messages').append($('<li>').text(msg).css('color',color));
-
-            set_markers(chatmap);
 
         })
 
