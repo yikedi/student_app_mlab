@@ -12,12 +12,14 @@ block style
             font: 13px Helvetica, Arial;
         }
 
+
         form {
             background: #000;
             padding: 3px;
             position: fixed;
             bottom: 0;
             width: 100%;
+            float:right
         }
 
         form input {
@@ -35,9 +37,12 @@ block style
         }
 
         #messages {
+            width:30%;
             list-style-type: none;
             margin: 0;
             padding: 0;
+            float:right;
+            clear:top
         }
 
         #messages li {
@@ -49,8 +54,9 @@ block style
         }
 
         #map {
-            height: 400px;
-            width: 100%;
+            float:left;
+            height: 700px;
+            width: 70%;
         }
 
 block content
@@ -62,10 +68,9 @@ block content
         input#m(autocomplete="off")
         button Send
 
+    a(href='/users/logout') log out
 
 block script
-    #user_name=user.username
-    #user_list=user_list
     script(src="http://code.jquery.com/jquery-3.2.1.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js")
     script(async='', defer = '', src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBtNQ3rNUC9SS_5z3sdzHZz7ndGrgXIxBM&callback=initMap')
@@ -73,11 +78,27 @@ block script
     script.
         var socket=io()
         var user_color=getRandomColor();
+        var chatmap;
         $('form').submit(function () {
+
+            var pos;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                        pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                })
+            }
+
+            var user = !{JSON.stringify(user)};
+            var username = user.username;
 
             socket.emit('chat',
                 {text:$('#m').val(),
-                color:user_color}
+                 username:username,
+                 pos:pos,
+                 color:user_color}
                 );
             $('#m').val('');
             return false;
@@ -86,10 +107,23 @@ block script
         socket.on('chat broadcast', function (input) {
             txt=input.text;
             color=input.color;
-            var msg=$('#user_name').text()+": "+txt;
-            $('#messages').append($('<li>').text(msg).css('color',color));
-        })
+            username=input.username;
+            pos=input.pos;
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                })
+            }
 
+            var msg=username+": "+txt;
+            $('#messages').append($('<li>').text(msg).css('color',color));
+
+            set_markers(chatmap);
+
+        })
 
         function getRandomColor() {
             var letters = '0123456789ABCDEF';
@@ -118,15 +152,8 @@ block script
                     infoWindow.setPosition(pos);
                     infoWindow.setContent('Location found.');
                     map.setCenter(pos);
-
-                    var i;
-                    var ulist=$('#user_list').val;
-                    for (i in ulist){
-                        var u=ulist[i];
-                        var photo=u.photo;
-                        var online=u.online;
-                        console.log(u.username);
-                    }
+                    chatmap=map;
+                    set_markers(map);
 
                 }, function () {
                     handleLocationError(true, infoWindow, map.getCenter());
@@ -136,18 +163,39 @@ block script
                 handleLocationError(false, infoWindow, map.getCenter());
             }
         }
+
+        function set_markers(map) {
+            var ulist = !{JSON.stringify(user_list)};
+
+            for (i in ulist) {
+                var u = ulist[i];
+                var photo = u.photo;
+                var online = u.online;
+                //var position=pos_list[i];
+                var position = u.position;
+
+                var image = {
+                    url: photo,
+                    size: new google.maps.Size(50, 50),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(0, 50)
+                }
+                var opacity = 1;
+                if (!online) {
+                    opacity = 0.5;
+                }
+
+                var user_marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: image,
+                    opacity: opacity
+                })
+            }
+        }
         script(async = '', defer = '', src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBtNQ3rNUC9SS_5z3sdzHZz7ndGrgXIxBM&callback=initMap')
 
-//        window.eqfeed_callback = function (results) {
-//            for (var i = 0; i < results.features.length; i++) {
-//                var coords = results.features[i].geometry.coordinates;
-//                var latLng = new google.maps.LatLng(coords[1], coords[0]);
-//                var marker = new google.maps.Marker({
-//                    position: latLng,
-//                    map: map
-//                });
-//            }
-//        }
+
 
 
 

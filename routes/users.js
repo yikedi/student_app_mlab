@@ -47,8 +47,12 @@ router.post('/login', passport.authenticate('local'), function(req, res) {
 });
 
 router.get('/logout', function(req, res) {
-    req.logout();
-    res.redirect('/');
+    var username=req.user._doc.username;
+    Student.update({"username":username},{"online":false},function () {
+        req.logout();
+        res.redirect('../student');
+    })
+
 });
 
 module.exports = router;

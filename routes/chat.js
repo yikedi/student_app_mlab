@@ -10,12 +10,13 @@ router.get('/', function(req, res, next) {
     }
     else {
         Student.find({},function (err,ulist) {
+
             for (i=0;i<ulist.length;i++){
                 u=ulist[i];
                 console.log(u.photo);
                 console.log(u.online);
             }
-            res.render('chat', {user: req.user, user_list:ulist});
+            res.render('chat', {user: req.user, user_list:ulist,db:Student});
         });
 
 

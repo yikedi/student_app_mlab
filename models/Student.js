@@ -10,7 +10,8 @@ var studentSchema =new Schema ({
     enrolled: Boolean,
     age: Number,
     photo:String,
-    online:Boolean
+    online:Boolean,
+    position:{lat:Number,lng:Number}
 });
 
 studentSchema.plugin(passportLocalMongoose);
