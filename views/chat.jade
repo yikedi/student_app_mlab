@@ -10,17 +10,27 @@ block style
 
         body {
             font: 13px Helvetica, Arial;
+            padding:0;
+            background: #fafafa;
+
+        }
+        .avatar{
+            border:2px solid red;
+            border-radius: 50px;
+            width:30px;
+            height: 30px;
+        }
+        .avatar-green-border{
+            border-color:green;
         }
 
 
         form {
-            background: #000;
+            background: white;
             padding: 3px;
             position: fixed;
             bottom: 0;
-            width: 100%;
-            float:right;
-            alignment:right;
+            width: 30%;
             clear:top;
         }
 
@@ -38,39 +48,71 @@ block style
             padding: 10px;
         }
 
-        #messages {
-            width:30%;
+        .messages {
+            width:100%;
             list-style-type: none;
             margin: 0;
             padding: 0;
-            float:right;
-            clear:top
+            text-align: right;
         }
 
-        #messages li {
+        .messages li {
             padding: 5px 10px;
+            background-color:#fafafa !important;
         }
 
-        #messages li:nth-child(odd) {
+
+        .messages li:nth-child(odd) {
             background: #eee;
+        }
+
+        .messages img{
+            border-radius: 50%;
+            width:30px;
+            height: 30px;
+            display: inline-block;
+            border:2px solid red;
+            vertical-align: middle;
+        }
+        .messages p{
+            display: inline-block;
+            vertical-align: middle;
+            padding:5px 20px;
+            background: white;
+            border-radius: 35px;
+            margin-right:10px;
         }
 
         #map {
             float:left;
-            height: 700px;
+            height: 100%;
             width: 70%;
+            position: absolute;
+
+        }
+
+        #chat_board{
+            float:right;
+            width: 30%;
+            background-color: #fafafa;
+        }
+
+        #main{
+            width:100%;
         }
 
 block content
 
-    #map
+    div#main
+        div#map
+        div#chat_board
+            a(href='/users/logout') log out
+            ul.messages
+            form(action='')
+                input#m(autocomplete="off")
+                button Send
 
-    ul#messages
-    form(action='')
-        input#m(autocomplete="off")
-        button Send
 
-    a(href='/users/logout') log out
 
 block script
     script(src="http://code.jquery.com/jquery-3.2.1.js")
@@ -81,25 +123,43 @@ block script
         var socket=io()
         var user_color=getRandomColor();
         var chatmap;
-        $('form').submit(function () {
 
-            var pos;
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                        pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
+        /*
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: -34.397, lng: 150.644},
+            zoom: 6
+        });
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                map.setCenter(pos);
+
+                socket.emit("get_pos",{map:map,pos:pos});
+                socket.on("get_pos broadcast",function (input) {
+                    map=input.map;
+                    pos=input.pos;
+                    set_this_user_marker(map,pos);
                 })
-            }
+            })
+        }
+        */
+
+
+
+        $('form').submit(function () {
 
             var user = !{JSON.stringify(user)};
             var username = user.username;
+            var photo=user.photo;
 
             socket.emit('chat',
                 {text:$('#m').val(),
                  username:username,
-                 pos:pos,
+                 photo:photo,
                  color:user_color}
                 );
             $('#m').val('');
@@ -110,20 +170,14 @@ block script
             txt=input.text;
             color=input.color;
             username=input.username;
-            pos=input.pos;
-            if (navigator.geolocation){
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    var pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                })
-            }
+            photo=input.photo;
 
-            var msg=username+": "+txt;
-            $('#messages').append($('<li>').text(msg).css('color',color));
+
+            $('.messages').append($("<li></li>").append("<p>" + username + ": "+ txt + "</p>").append("<img src="+ photo + ">").css('color',color));
+
 
         })
+
 
         function getRandomColor() {
             var letters = '0123456789ABCDEF';
@@ -134,7 +188,9 @@ block script
             return color;
         }
 
+
         function initMap() {
+
             var map = new google.maps.Map(document.getElementById('map'), {
                 center: {lat: -34.397, lng: 150.644},
                 zoom: 6
@@ -143,17 +199,26 @@ block script
 
             // Try HTML5 geolocation.
             if (navigator.geolocation) {
+
                 navigator.geolocation.getCurrentPosition(function (position) {
                     var pos = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
 
-                    infoWindow.setPosition(pos);
-                    infoWindow.setContent('Location found.');
+                    //infoWindow.setPosition(pos);
+                    //infoWindow.setContent('Location found.');
                     map.setCenter(pos);
-                    chatmap=map;
-                    set_markers(map);
+                    
+                    //set_markers(map);
+                    set_this_user_marker(map,pos);
+
+                    /*
+                    socket.emit("newuserlogin",{map:map,pos:pos});
+                    socket.on("newuserlogin broadcast",function (input) {
+                        set_this_user_marker(input.map,input.pos);
+                    })
+                    */
 
                 }, function () {
                     handleLocationError(true, infoWindow, map.getCenter());
@@ -163,6 +228,7 @@ block script
                 handleLocationError(false, infoWindow, map.getCenter());
             }
         }
+
 
         function set_markers(map) {
             var ulist = !{JSON.stringify(user_list)};
@@ -191,7 +257,26 @@ block script
                     icon: image,
                     opacity: opacity
                 })
+
+           }
+        }
+
+        function set_this_user_marker(map,pos) {
+            var user=!{JSON.stringify(user)};
+            var photo=user.photo;
+            var position=user.position;
+            var image = {
+                url: photo,
+                size: new google.maps.Size(50, 50),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(0, 50)
             }
+
+            var user_marker=new google.maps.Marker({
+                position:position,
+                map:map,
+                icon:image
+            })
         }
         script(async = '', defer = '', src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBtNQ3rNUC9SS_5z3sdzHZz7ndGrgXIxBM&callback=initMap')
 

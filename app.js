@@ -49,11 +49,16 @@ io.on('connection', function(socket) {
         console.log('disconnected');
     });
     socket.on('chat',function (retval) {
-      console.log(retval);
       io.emit('chat broadcast',retval);
-        console.log(retval);
+    });
+
+    socket.on('newuserlogin', function(input) {
+
+       io.emit('newuserlogin broadcast',input) ;
     })
 });
+
+
 
 
 // view engine setup
